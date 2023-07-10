@@ -1,0 +1,34 @@
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cloudblue/sample-spa
+    ports:
+      - "8000:8000"
+      - "5173:5173"
+    volumes:
+      - ./:/app
+
+  format:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cloudblue/sample-spa
+    volumes:
+      - .:/app
+    command: >
+      bash -c "isort . &&
+               black . &&
+               cd frontend &&
+               npm run lint &&
+               npm run format"
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: cloudblue/sample-spa
+    volumes:
+      - .:/app
+    command: >
+      bash -c "pytest . "
