@@ -3,9 +3,44 @@ import ExtensionIframe from './components/ExtensionIframe.vue'
 </script>
 
 <template>
-  <main>
-    <ExtensionIframe />
-  </main>
+  <div class="content">
+    <header>
+      <img
+        class="logo"
+        src="data:image/png;base64,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"
+      />
+    </header>
+    <main>
+      <ExtensionIframe />
+    </main>
+  </div>
 </template>
 
-<style scoped></style>
+<style scoped>
+.content {
+  position: relative;
+  height: 100vh;
+  width: 100vw;
+  display: flex;
+  flex-direction: column;
+}
+
+header {
+  height: 400px;
+  width: 100%;
+  background-color: var(--accent-color);
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  padding: 80px;
+}
+
+.logo {
+  height: 48px;
+}
+
+main {
+  background-color: var(--light-background);
+}
+</style>
