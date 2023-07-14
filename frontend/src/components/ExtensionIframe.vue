@@ -14,7 +14,17 @@ export default {
   methods: {
     async requestIframeDetails() {
       try {
-        const response = await fetch('/iframe_details').then((r) => r.json())
+        const urlParams = new URLSearchParams(window.location.search)
+        const tierAccountId = urlParams.get('tier_account_id') || null
+
+        const url = new URL('/iframe_details', window.location.origin)
+
+        if (tierAccountId !== null) {
+          const params = { tier_account_id: tierAccountId }
+          url.search = new URLSearchParams(params).toString()
+        }
+
+        const response = await fetch(url).then((r) => r.json())
         this.iframeUrl = response.url
         this.label = response.label
         this.icon = response.icon
