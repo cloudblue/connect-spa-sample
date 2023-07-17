@@ -12,11 +12,8 @@ export default {
   },
 
   methods: {
-    async requestIframeDetails() {
+    async requestIframeDetails(tierAccountId) {
       try {
-        const urlParams = new URLSearchParams(window.location.search)
-        const tierAccountId = urlParams.get('tier_account_id') || null
-
         const url = new URL('/iframe_details', window.location.origin)
 
         if (tierAccountId !== null) {
@@ -39,8 +36,9 @@ export default {
       this.label = searchParams.get('label') || null
       this.icon = searchParams.get('icon') || null
       this.iframeUrl = searchParams.get('url') || null
+      const tierAccountId = searchParams.get('tier_account_id') || null
 
-      if (!this.hasIframeData) this.requestIframeDetails()
+      if (!this.hasIframeData) this.requestIframeDetails(tierAccountId)
     }
   },
 

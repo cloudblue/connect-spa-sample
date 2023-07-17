@@ -22,19 +22,23 @@ class Client:
         """
         first_available_page = await self._get_first_page()
         auth_code = await self._get_auth_code(
-            first_available_page["extension"]["login_uri"]
+            first_available_page["extension"]["extension_id"]
         )
 
-        return {
-            "url": f"https://"
-            f"{first_available_page['extension']['hostname']}."
+        extension_full_url = (
+            f"https://{first_available_page['extension']['hostname']}."
             f"{first_available_page['extension']['domain']}"
-            f"{first_available_page['extension']['login_uri']}?"
-            f"code={auth_code}&"
-            f"redirect_to="
-            f"{first_available_page['url']}",
+        )
+        login_url = (
+            f"{extension_full_url}{first_available_page['extension']['login_uri']}?"
+            f"code={auth_code}&redirect_to={first_available_page['url']}"
+        )
+        icon_url = f"{extension_full_url}{first_available_page['icon']}"
+
+        return {
+            "url": login_url,
             "label": first_available_page["label"],
-            "icon": "https://www.iana.org/_img/2022/iana-logo-header.svg",
+            "icon": icon_url,
         }
 
     async def _get_first_page(self) -> Dict[str, Any]:
@@ -48,7 +52,12 @@ class Client:
         Raises:
             Exception: If the pages array is empty, an exception is raised with a relevant error message.
         """
-        page = await self.connect_client("devops").collection("pages").filter(integration_point='customer').first()
+        page = (
+            await self.connect_client("devops")
+            .collection("pages")
+            .filter(integration_point="customer")
+            .first()
+        )
 
         if not page:
             logging.error("Error: pages request returned empty array")
@@ -56,14 +65,14 @@ class Client:
 
         return page
 
-    async def _get_auth_code(self, login_url: str) -> str:
+    async def _get_auth_code(self, extension_id: str) -> str:
         """
-        Fetches the authentication code from the provided login_url endpoint of the API.
+        Fetches the authentication code from the login endpoint of the API.
 
         If the response JSON does not contain a "code", it logs an error and raises an exception.
 
         Args:
-            login_url (str): The login URL to which the POST request will be sent.
+            extension_id (str): Extension id to be called upon. (EXT-000-000)
 
         Returns:
             str: The authentication code retrieved from the response JSON.
@@ -72,12 +81,9 @@ class Client:
             Exception: If the "code" is not found in the response JSON,
             an exception is raised with a relevant error message.
         """
-        ext_id = re.search(r"EXT-\d+-\d+", login_url)
-        if not ext_id:
-            raise Exception("EXT-id not found in login_url")
 
         response_json = (
-            await self.connect_client("auth").eaas[ext_id.group()]("login").post()
+            await self.connect_client("auth").eaas[extension_id]("login").post()
         )
 
         if "code" not in response_json:
