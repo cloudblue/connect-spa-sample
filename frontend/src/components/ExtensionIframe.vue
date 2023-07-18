@@ -12,9 +12,16 @@ export default {
   },
 
   methods: {
-    async requestIframeDetails() {
+    async requestIframeDetails(tierAccountId) {
       try {
-        const response = await fetch('/iframe_details').then((r) => r.json())
+        const url = new URL('/iframe_details', window.location.origin)
+
+        if (tierAccountId !== null) {
+          const params = { tier_account_id: tierAccountId }
+          url.search = new URLSearchParams(params).toString()
+        }
+
+        const response = await fetch(url).then((r) => r.json())
         this.iframeUrl = response.url
         this.label = response.label
         this.icon = response.icon
@@ -29,8 +36,9 @@ export default {
       this.label = searchParams.get('label') || null
       this.icon = searchParams.get('icon') || null
       this.iframeUrl = searchParams.get('url') || null
+      const tierAccountId = searchParams.get('tier_account_id') || null
 
-      if (!this.hasIframeData) this.requestIframeDetails()
+      if (!this.hasIframeData) this.requestIframeDetails(tierAccountId)
     }
   },
 

@@ -1,9 +1,11 @@
+import os
+
 from dotenv import load_dotenv
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
-from backend.connect_client import get_iframe_details
+from backend.connect_client import Client
 
 load_dotenv()
 app = FastAPI()
@@ -25,8 +27,15 @@ app.add_middleware(
 
 
 @app.get("/iframe_details")
-async def iframe_details():
-    return await get_iframe_details()
+async def iframe_details(tier_account_id: str = None):
+    if tier_account_id is None:
+        tier_account_id = os.getenv("TIER_ACCOUNT_ID")
+    client = Client(
+        api_key=os.getenv("API_KEY"),
+        api_host=os.getenv("API_HOST"),
+        tier_account_id=tier_account_id,
+    )
+    return await client.get_iframe_details()
 
 
 app.mount("/", StaticFiles(directory="frontend/dist", html=True), name="SPA")
